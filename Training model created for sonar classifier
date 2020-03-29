@@ -1,0 +1,56 @@
+import pandas as pd
+import tensorflow as tf
+import sklearn
+from sklearn import model_selection
+import matplotlib.pyplot as plt
+from sklearn.utils import shuffle
+from sklearn import preprocessing, svm
+import numpy as np
+import pickle
+
+# To read the data
+data = pd.read_csv('sonar.all-data')
+print(data.head())
+
+# Data processing
+x = np.array(data[data.columns[0:60]])
+le = preprocessing.LabelEncoder()
+preprocessing.scale(x)
+y = np.array(le.fit_transform(data[data.columns[60]]))
+
+# To shuffle the dataset to mix up with the rows
+x, y = shuffle(x, y, random_state=1)
+
+# splitting the dataset into a train- test split
+
+x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.1)
+
+#Training the data
+
+best = 0
+for _ in range(100):
+    x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.1)
+    model = svm.SVC()
+    model.fit(x_train, y_train)
+
+# To determine the accuracy of the model
+    score = model.score(x_test, y_test)
+
+    if score > best:
+        best = score
+    print(score)
+    
+ # To save the model so we don't retain the model each time we run the program
+    with open('sonar_data.pickle', 'wb') as f:
+        pickle.dump(model,f)'''
+# To load the saved model
+pickle_in = open('sonar_data.pickle', 'rb')
+model = pickle.load(pickle_in)
+
+# To make predictions using the model
+classes = ['rock', 'mines']
+
+prediction = model.predict(x_test)
+for i in range(len(prediction)):
+    print(classes[prediction[i]], classes[y_test[i]] )
+
